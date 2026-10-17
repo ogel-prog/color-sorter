@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Color Sorter｜色を揃えるリングパズル">
+<meta property="og:description" content="一番上のリングを動かして、同じ色を1本のポールに10個そろえよう。3色モードと4色モードで、最速タイムと最少手数に挑戦できるソロ用パズルです。">
+<meta property="og:site_name" content="Color Sorter">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://ogel-prog.github.io/color-sorter/images/ogp.png">
+<meta property="og:url" content="https://ogel-prog.github.io/color-sorter/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Color Sorter｜色を揃えるリングパズル">
+<meta name="twitter:description" content="一番上のリングを動かして、同じ色を1本のポールに10個そろえよう。3色・4色モードで最速タイムと最少手数に挑戦！">
+<meta name="description" content="一番上のリングを動かして、同じ色を1本のポールに10個そろえるソロ用パズルゲーム。3色・4色モード、最速タイムと最少手数の記録つき。">
+<meta name="twitter:image" content="https://ogel-prog.github.io/color-sorter/images/ogp.png">
+<title>Color Sorter</title>
+<link rel="icon" href="./images/favicon.ico">
+<link rel="apple-touch-icon" href="./images/apple-touch-icon.png">
+<link rel="manifest" href="./images/manifest.webmanifest">
+<style>
+:root{--bg:#1b1240;--bg2:#3a1f6b;--pole:#0d0a1f;--ink:#f4f0ff;--mut:#b9aee0;--acc:#ffd36b;--r:#e5484d;--b:#3b82f6;--g:#22a05a;--y:#f2c40f;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Hiragino Maru Gothic ProN","Hiragino Sans",system-ui,sans-serif}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+.app{position:relative;width:100%;max-width:380px;height:100%;max-height:580px;margin:0 auto;background:linear-gradient(160deg,var(--bg2),var(--bg));overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+#start{align-items:center;justify-content:center;gap:18px}
+h1{font-size:46px;margin:0 0 6px;letter-spacing:.02em;font-weight:800;text-align:center;line-height:1.1}
+.demo{display:flex;gap:8px;margin-bottom:10px}
+.demo span{width:44px;height:26px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff8}
+.btn{background:var(--acc);color:#2a1a00;font-weight:800;font-size:22px;padding:14px 0;width:240px;border-radius:30px;box-shadow:0 5px 0 #b88a1f}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #b88a1f}
+.btn.sub{background:#4a3a86;color:var(--ink);box-shadow:0 4px 0 #2a1f55;font-size:18px;padding:12px 0;width:240px}
+.best{color:var(--mut);font-size:13px;line-height:1.8;text-align:center}
+.recs{display:flex;gap:22px}
+.best b{color:var(--ink);font-variant-numeric:tabular-nums}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;height:60px}
+#time{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.menu{background:#4a3a86;font-size:24px;line-height:1;padding:8px 14px;border-radius:16px}
+.board{display:flex;margin:auto 10px 0;height:384px}
+.col{flex:1;position:relative;border-radius:12px}
+.col.sel{background:rgba(255,211,107,.14)}
+.col::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:8px;margin-left:-4px;background:var(--pole);border-radius:4px}
+.stack{position:absolute;left:5px;right:5px;bottom:0;display:flex;flex-direction:column-reverse;gap:2px}
+.ring{height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#ffffffaa;box-shadow:inset 0 3px 0 #ffffff40,inset 0 -4px 0 #00000030}
+.ring.r{background:var(--r)}.ring.b{background:var(--b)}.ring.g{background:var(--g)}.ring.y{background:var(--y)}
+.ring.up{transform:translateY(-12px);outline:3px solid var(--acc);outline-offset:1px}
+.base{height:16px;margin:0 6px 10px;background:var(--pole);border-radius:8px}
+.moves{height:28px;margin-bottom:18px;text-align:center;font-size:18px;font-weight:700;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.overlay{position:absolute;inset:0;background:rgba(10,6,30,.82);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:5;text-align:center}
+.overlay.on{display:flex}
+.overlay h2{font-size:34px;margin:0}
+.overlay p{margin:0;font-size:18px;color:var(--acc);white-space:pre-line;min-height:1.4em}
+.overlay .big{font-size:34px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="screen on" id="start">
+    <h1>Color<br>Sorter</h1>
+    <div class="demo"><span style="background:var(--r)">▲</span><span style="background:var(--b)">◆</span><span style="background:var(--g)">●</span><span style="background:var(--y)">■</span></div>
+    <button class="btn" id="go3">3色スタート</button>
+    <button class="btn" id="go4">4色スタート</button>
+    <div class="recs">
+      <div class="best"><b>3 COLORS</b><br>BEST TIME<br><b id="best3">-</b><br>FEWEST MOVES<br><b id="bm3">-</b></div>
+      <div class="best"><b>4 COLORS</b><br>BEST TIME<br><b id="best4">-</b><br>FEWEST MOVES<br><b id="bm4">-</b></div>
+    </div>
+  </section>
+  <section class="screen" id="game">
+    <header><div id="time">0:00:00.0</div><button class="menu" id="menuBtn" aria-label="メニュー">☰</button></header>
+    <div class="board" id="board"></div>
+    <div class="base"></div>
+    <div class="moves" id="moves">MOVE COUNT:0</div>
+    <div class="overlay" id="menu">
+      <h2>メニュー</h2>
+      <button class="btn sub" id="resume">ゲームに戻る</button>
+      <button class="btn sub" id="retry">やり直し</button>
+      <button class="btn sub" id="home">スタートに戻る</button>
+    </div>
+    <div class="overlay" id="clear">
+      <h2>クリア！</h2>
+      <div class="big" id="clearTime"></div>
+      <div class="big" id="clearMoves"></div>
+      <p id="clearNote"></p>
+      <button class="btn" id="again">もう一回プレイ</button>
+      <button class="btn sub" id="home2">スタートに戻る</button>
+    </div>
+  </section>
+</div>
+<script>
+(function(){
+var CAP=10, ALL=['r','b','g','y'], SYM={r:'▲',b:'◆',g:'●',y:'■'}, LS=['colorSorterBest','colorSorterBest4'], LM=['colorSorterFewestMoves','colorSorterFewestMoves4'], mode=3, KEYS=ALL.slice(0,3);
+var $=function(id){return document.getElementById(id)};
+var poles=[],init=[],sel=-1,acc=0,t0=0,tm=null,playing=false,moves=0;
+
+function fmt(ms){var d=Math.floor(ms/100),t=d%10,s=Math.floor(d/10)%60,m=Math.floor(d/600)%60,h=Math.floor(d/36000);
+  return h+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+t}
+function rd(k){try{var v=localStorage.getItem(k);return v?parseInt(v,10):null}catch(e){return null}}
+function getBest(){return rd(LS[mode-3])}
+function setBest(v){try{localStorage.setItem(LS[mode-3],String(v))}catch(e){}}
+function getMoves(){return rd(LM[mode-3])}
+function setMoves(v){try{localStorage.setItem(LM[mode-3],String(v))}catch(e){}}
+function showBest(){[3,4].forEach(function(n){var b=rd(LS[n-3]),m=rd(LM[n-3]);$('best'+n).textContent=b===null?'-':fmt(b);$('bm'+n).textContent=m===null?'-':m})}
+function show(id){['start','game'].forEach(function(s){$(s).classList.toggle('on',s===id)})}
+
+function solved(){return poles.every(function(p){return p.length===0||(p.length===CAP&&p.every(function(c){return c===p[0]}))})}
+function layout(){
+  do{
+    var a=[];KEYS.forEach(function(k){for(var i=0;i<CAP;i++)a.push(k)});
+    for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var x=a[i];a[i]=a[j];a[j]=x}
+    var np=KEYS.length+(mode===4?2:1),order=[],q;
+    for(q=0;q<np;q++)order.push(q);
+    if(mode===4){for(q=np-1;q>0;q--){var z=Math.floor(Math.random()*(q+1)),w=order[q];order[q]=order[z];order[z]=w}}
+    var filled=mode===4?[1,2,3,4]:order.slice(1);
+    poles=[];for(q=0;q<np;q++)poles.push([]);
+    filled.forEach(function(p,k){poles[p]=a.slice(k*CAP,k*CAP+CAP)});
+  }while(solved());
+  init=poles.map(function(p){return p.slice()});
+}
+
+function build(){
+  var b=$('board');b.innerHTML='';
+  for(var i=0;i<poles.length;i++){
+    (function(i){
+      var c=document.createElement('div');c.className='col';c.id='col'+i;
+      var s=document.createElement('div');s.className='stack';c.appendChild(s);
+      c.addEventListener('click',function(){tap(i)});
+      b.appendChild(c);
+    })(i);
+  }
+}
+function render(){
+  $('moves').textContent='MOVE COUNT:'+moves;
+  for(var i=0;i<poles.length;i++){
+    var c=$('col'+i),s=c.firstChild;s.innerHTML='';
+    c.classList.toggle('sel',sel===i);
+    poles[i].forEach(function(k,idx){
+      var r=document.createElement('div');r.className='ring '+k;r.textContent=SYM[k];
+      if(sel===i&&idx===poles[i].length-1)r.classList.add('up');
+      s.appendChild(r);
+    });
+  }
+}
+function tick(){$('time').textContent=fmt(acc+Date.now()-t0)}
+function run(){t0=Date.now();clearInterval(tm);tm=setInterval(tick,100);playing=true}
+function pause(){if(playing){acc+=Date.now()-t0}clearInterval(tm);playing=false}
+
+function tap(i){
+  if(!playing)return;
+  if(sel<0){if(poles[i].length)sel=i}
+  else if(sel===i){sel=-1}
+  else if(poles[i].length<CAP){poles[i].push(poles[sel].pop());sel=-1;moves++}
+  render();
+  if(solved())win();
+}
+function win(){
+  pause();$('time').textContent=fmt(acc);
+  var t=acc,b=getBest(),m=getMoves(),notes=[];
+  if(b===null||t<b){setBest(t);notes.push('NEW BEST TIME!')}
+  if(m===null||moves<m){setMoves(moves);notes.push('NEW FEWEST MOVES!')}
+  $('clearTime').textContent='TIME '+fmt(t);
+  $('clearMoves').textContent='MOVES '+moves;
+  $('clearNote').textContent=notes.join('\n');
+  $('clear').classList.add('on');
+}
+function begin(newLayout,m){
+  if(m){mode=m;KEYS=ALL.slice(0,m)}
+  if(newLayout)layout();
+  else poles=init.map(function(p){return p.slice()});
+  sel=-1;acc=0;moves=0;
+  $('clear').classList.remove('on');$('menu').classList.remove('on');
+  build();render();$('time').textContent=fmt(0);
+  show('game');run();
+}
+
+$('go3').onclick=function(){begin(true,3)};$('go4').onclick=function(){begin(true,4)};
+$('again').onclick=function(){begin(true)};
+$('menuBtn').onclick=function(){if(!playing)return;pause();$('menu').classList.add('on')};
+$('resume').onclick=function(){$('menu').classList.remove('on');run()};
+$('retry').onclick=function(){begin(false)};
+var goHome=function(){pause();$('menu').classList.remove('on');$('clear').classList.remove('on');showBest();show('start')};
+$('home').onclick=goHome;$('home2').onclick=goHome;
+document.addEventListener('gesturestart',function(e){e.preventDefault()});
+showBest();
+})();
+</script>
+</body>
+</html>
