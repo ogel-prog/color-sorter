@@ -15,10 +15,10 @@
 <meta name="twitter:description" content="一番上のリングを動かして、同じ色を1本のポールに10個そろえよう。3色・4色モードで最速タイムと最少手数に挑戦！">
 <meta name="description" content="一番上のリングを動かして、同じ色を1本のポールに10個そろえるソロ用パズルゲーム。3色・4色モード、最速タイムと最少手数の記録つき。">
 <meta name="twitter:image" content="https://ogel-prog.github.io/color-sorter/images/ogp.png">
-<title>Color Sorter</title>
 <link rel="icon" href="./images/favicon.ico">
 <link rel="apple-touch-icon" href="./images/apple-touch-icon.png">
 <link rel="manifest" href="./images/manifest.webmanifest">
+<title>Color Sorter</title>
 <style>
 :root{--bg:#1b1240;--bg2:#3a1f6b;--pole:#0d0a1f;--ink:#f4f0ff;--mut:#b9aee0;--acc:#ffd36b;--r:#e5484d;--b:#3b82f6;--g:#22a05a;--y:#f2c40f;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:manipulation}
@@ -28,7 +28,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 .screen{position:absolute;inset:0;display:none;flex-direction:column}
 .screen.on{display:flex}
 button{font:inherit;color:inherit;border:0;cursor:pointer}
-#start{align-items:center;justify-content:center;gap:18px}
+#start{align-items:center;justify-content:center;gap:12px}
 h1{font-size:46px;margin:0 0 6px;letter-spacing:.02em;font-weight:800;text-align:center;line-height:1.1}
 .demo{display:flex;gap:8px;margin-bottom:10px}
 .demo span{width:44px;height:26px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff8}
@@ -56,6 +56,13 @@ header{display:flex;justify-content:space-between;align-items:center;padding:12p
 .overlay h2{font-size:34px;margin:0}
 .overlay p{margin:0;font-size:18px;color:var(--acc);white-space:pre-line;min-height:1.4em}
 .overlay .big{font-size:34px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.btn.small{font-size:16px;padding:9px 0;width:130px;box-shadow:0 3px 0 #b88a1f}
+.btn.sub.small{box-shadow:0 3px 0 #2a1f55}
+.btn.sub.mini{font-size:12px;padding:6px 0;width:110px;box-shadow:0 2px 0 #2a1f55}
+.card{background:#2a1f55;border-radius:18px;padding:22px 20px;width:320px;max-width:92%;text-align:left;display:flex;flex-direction:column;gap:12px}
+.card h2{font-size:22px;text-align:center}
+.card p{color:var(--ink);font-size:15px;line-height:1.7;white-space:normal;min-height:0;margin:0}
+.row{display:flex;gap:12px;justify-content:center;margin-top:4px}
 </style>
 </head>
 <body>
@@ -65,10 +72,12 @@ header{display:flex;justify-content:space-between;align-items:center;padding:12p
     <div class="demo"><span style="background:var(--r)">▲</span><span style="background:var(--b)">◆</span><span style="background:var(--g)">●</span><span style="background:var(--y)">■</span></div>
     <button class="btn" id="go3">3色スタート</button>
     <button class="btn" id="go4">4色スタート</button>
+    <button class="btn sub small" id="rulesBtn">ルール</button>
     <div class="recs">
       <div class="best"><b>3 COLORS</b><br>BEST TIME<br><b id="best3">-</b><br>FEWEST MOVES<br><b id="bm3">-</b></div>
       <div class="best"><b>4 COLORS</b><br>BEST TIME<br><b id="best4">-</b><br>FEWEST MOVES<br><b id="bm4">-</b></div>
     </div>
+    <button class="btn sub mini" id="clr">スコアクリア</button>
   </section>
   <section class="screen" id="game">
     <header><div id="time">0:00:00.0</div><button class="menu" id="menuBtn" aria-label="メニュー">☰</button></header>
@@ -79,6 +88,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:12p
       <h2>メニュー</h2>
       <button class="btn sub" id="resume">ゲームに戻る</button>
       <button class="btn sub" id="retry">やり直し</button>
+      <button class="btn sub" id="rulesMenu">ルールブック</button>
       <button class="btn sub" id="home">スタートに戻る</button>
     </div>
     <div class="overlay" id="clear">
@@ -90,6 +100,18 @@ header{display:flex;justify-content:space-between;align-items:center;padding:12p
       <button class="btn sub" id="home2">スタートに戻る</button>
     </div>
   </section>
+  <div class="overlay" id="rules"><div class="card">
+    <h2>ルール</h2>
+    <p>目的は、すべてのブロックを色ごとに分けることです。同じ色のブロックを1本のポールに10個積んだ状態にします。</p>
+    <p>ポールをタップすると、一番上のブロックが選択されます。選択中に別のポールをタップすると、そのポールの一番上に移動します。同じポールをもう一度タップすると選択を解除します。</p>
+    <p>1本のポールには10個までしか積めません。</p>
+    <div class="row"><button class="btn sub small" id="rulesClose">閉じる</button></div>
+  </div></div>
+  <div class="overlay" id="confirm"><div class="card">
+    <h2>スコアクリア</h2>
+    <p>3色・4色の記録をすべて消します。よろしいですか？</p>
+    <div class="row"><button class="btn sub small" id="no">いいえ</button><button class="btn small" id="yes">はい</button></div>
+  </div></div>
 </div>
 <script>
 (function(){
@@ -184,6 +206,18 @@ $('resume').onclick=function(){$('menu').classList.remove('on');run()};
 $('retry').onclick=function(){begin(false)};
 var goHome=function(){pause();$('menu').classList.remove('on');$('clear').classList.remove('on');showBest();show('start')};
 $('home').onclick=goHome;$('home2').onclick=goHome;
+var fromGame=false;
+function openRules(g){fromGame=g;$('rules').classList.add('on')}
+function closeRules(){$('rules').classList.remove('on');if(fromGame){fromGame=false;run()}}
+$('rulesBtn').onclick=function(){openRules(false)};
+$('rulesMenu').onclick=function(){$('menu').classList.remove('on');openRules(true)};
+$('rulesClose').onclick=closeRules;
+$('rules').onclick=function(e){if(e.target===this)closeRules()};
+function closeConfirm(){$('confirm').classList.remove('on')}
+$('clr').onclick=function(){$('confirm').classList.add('on')};
+$('no').onclick=closeConfirm;
+$('confirm').onclick=function(e){if(e.target===this)closeConfirm()};
+$('yes').onclick=function(){try{LS.concat(LM).forEach(function(k){localStorage.removeItem(k)})}catch(e){}closeConfirm();showBest()};
 document.addEventListener('gesturestart',function(e){e.preventDefault()});
 showBest();
 })();
